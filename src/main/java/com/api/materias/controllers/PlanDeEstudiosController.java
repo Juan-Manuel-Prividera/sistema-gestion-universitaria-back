@@ -1,9 +1,10 @@
 package com.api.materias.controllers;
 
-import com.api.materias.model.entity.Materia;
 import com.api.materias.model.entity.PlanDeEstudios;
+import com.api.materias.model.entity.curso.Materia;
 import com.api.materias.model.repository.PlanDeEstudiosRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,7 +18,6 @@ public class PlanDeEstudiosController {
     this.planesRepository = planesRepository;
   }
 
-
   @GetMapping("/planes")
   public List<PlanDeEstudios> getAllPlanes(){
     return planesRepository.findAll();
@@ -25,42 +25,30 @@ public class PlanDeEstudiosController {
 
   @GetMapping("/plan/{codigo}")
   public PlanDeEstudios getPlanDeEstudios(@PathVariable String codigo){
-    List<PlanDeEstudios> planes = planesRepository.findAll();
-    for(PlanDeEstudios plan : planes){
-      if (plan.getCodigo().equals(codigo)){
-        return plan;
-      }
-    }
-    return null;
-  }
-
-  @PostMapping("/planes")
-  public void createPlanDeEstudios(@RequestBody PlanDeEstudios plan){
-    planesRepository.save(plan);
+    return planesRepository.findByCodigo(codigo);
   }
 
   @GetMapping("/plan/{codigo}/materias")
   public List<Materia> getPlanDeEstudiosMaterias(@PathVariable String codigo){
-    List<PlanDeEstudios> planes = planesRepository.findAll();
-    for(PlanDeEstudios plan : planes){
-      if (plan.getCodigo().equals(codigo)){
-        return plan.getMaterias();
-      }
-    }
-    return null;
+    return planesRepository.findByCodigo(codigo).getMaterias();
   }
 
   @GetMapping("/plan/{codigo}/materias/{nivel}")
   public List<Materia> getPlanDeEstudiosMateriasNivel(@PathVariable String codigo, @PathVariable Integer nivel){
-    List<PlanDeEstudios> planes = planesRepository.findAll();
-    for(PlanDeEstudios plan : planes){
-      if (plan.getCodigo().equals(codigo)){
-        return plan.getMaterias()
-            .stream()
-            .filter(materia -> materia.getNivel().equals(nivel))
-            .toList();
-      }
-    }
-    return null;
+    List<Materia> materias= planesRepository.findByCodigo(codigo).getMaterias();
+    return materias.stream()
+        .filter(materia -> materia.getNivel().equals(nivel))
+        .toList();
   }
+
+  @PostMapping("/planes")
+  public ResponseEntity<String> createPlanDeEstudios(@RequestBody PlanDeEstudios plan){
+    try {
+      planesRepository.save(plan);
+      return ResponseEntity.ok("Plan de estudios creado con exito!");
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+    }
+  }
+
 }
