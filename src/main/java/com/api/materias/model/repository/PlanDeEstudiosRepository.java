@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PlanDeEstudiosRepository extends JpaRepository<PlanDeEstudios, Long> {
+  PlanDeEstudios findByCodigo(String codigo);
 }

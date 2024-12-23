@@ -1,12 +1,12 @@
 package com.api.materias.model.entity;
 
+import com.api.materias.model.entity.curso.Materia;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Cascade;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
 

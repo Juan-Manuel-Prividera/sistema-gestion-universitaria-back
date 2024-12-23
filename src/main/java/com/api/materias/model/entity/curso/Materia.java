@@ -1,11 +1,14 @@
-package com.api.materias.model.entity;
+package com.api.materias.model.entity.curso;
 
-import jakarta.persistence.*;
+import com.api.materias.model.entity.Persistente;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Collate;
 
 import java.util.List;
 
@@ -15,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "materia")
-public class Materia extends Persistente{
+public class Materia extends Persistente {
     @Column
     private String nombre;
     @OneToMany

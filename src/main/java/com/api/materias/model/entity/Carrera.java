@@ -3,9 +3,9 @@ package com.api.materias.model.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jdk.jfr.Enabled;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 @Table
 @AllArgsConstructor
@@ -17,5 +17,6 @@ public class Carrera  extends Persistente{
   private String nombre;
   @Column
   private Integer duracion; // anios
-
+  @Column
+  private Character letraIdentificadora; // K, Q, R ...
 }
