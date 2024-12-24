@@ -19,14 +19,14 @@ public class CalificacionController {
   }
 
 
-  @GetMapping("/alumnos/{idAlumno}")
-  public List<Calificacion> getCalificacionesPorAlumno(@PathVariable Long idAlumno) {
-    return calificacionRepository.findByAlumnoId(idAlumno);
-  }
-
   @GetMapping("/{idCalificacion}")
   public Calificacion getCalificacionPorId(@PathVariable Long idCalificacion) {
     return calificacionRepository.findById(idCalificacion).orElse(null);
+  }
+
+  @GetMapping("/alumnos/{idAlumno}")
+  public List<Calificacion> getCalificacionesPorAlumno(@PathVariable Long idAlumno) {
+    return calificacionRepository.findByAlumnoId(idAlumno);
   }
 
   @GetMapping("/evaluacion/{idEvaluacion}")

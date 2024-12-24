@@ -3,16 +3,15 @@ package com.api.materias.controllers;
 
 import com.api.materias.model.entity.Mensaje;
 import com.api.materias.model.entity.curso.*;
+import com.api.materias.model.entity.personas.Alumno;
 import com.api.materias.model.repository.CursadaRepository;
 import com.api.materias.model.repository.InscripcionRepository;
 import com.api.materias.service.Notificador;
+import com.api.materias.service.SelectorAlumnosAInscribir;
 import com.api.materias.service.ValidadorCorrelativas;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,11 +20,13 @@ import java.util.List;
 @RequestMapping("/inscripciones")
 public class InscripcionController {
   private final ValidadorCorrelativas validadorCorrelativas;
+  private final SelectorAlumnosAInscribir selectorAlumnosAInscribir;
   private final InscripcionRepository inscripcionRepository;
   private final CursadaRepository cursadaRepository;
 
-  public InscripcionController(ValidadorCorrelativas validadorCorrelativas, InscripcionRepository inscripcionRepository, CursadaRepository cursadaRepository) {
+  public InscripcionController(ValidadorCorrelativas validadorCorrelativas, SelectorAlumnosAInscribir selectorAlumnosAInscribir, InscripcionRepository inscripcionRepository, CursadaRepository cursadaRepository) {
     this.validadorCorrelativas = validadorCorrelativas;
+    this.selectorAlumnosAInscribir = selectorAlumnosAInscribir;
     this.inscripcionRepository = inscripcionRepository;
     this.cursadaRepository = cursadaRepository;
   }
@@ -52,36 +53,57 @@ public class InscripcionController {
     }
   }
 
-  @PostMapping("/confirmar")
-  public ResponseEntity<String> confirmarInscripcion(@RequestBody Inscripcion inscripcionRequest) {
+
+
+  @PostMapping("curso/{idCurso}/cerrar")
+  public ResponseEntity<String> cerrarInscripciones(@PathVariable Long idCurso) {
     try {
-      EstadoInscripcion estadoInscripcion = new EstadoInscripcion(TipoEstadoInscripcion.APROBADA, LocalDateTime.now(), inscripcionRequest);
-      inscripcionRequest.setEstadoActual(estadoInscripcion);
-      inscripcionRepository.save(inscripcionRequest);
+      Curso curso = inscripcionRepository.findByCursoId(idCurso).get(0).getCurso();
+      List<Inscripcion> inscripciones = inscripcionRepository.findByCursoId(idCurso);
+      List<Alumno> alumnosInscriptos = inscripciones.stream().map(Inscripcion::getAlumno).toList();
 
-      Mensaje mensaje = new Mensaje("Inscripcion", "Inscripcion confirmada en el curso " + inscripcionRequest.getCurso().getCodigo());
-      Notificador.notificar(inscripcionRequest.getAlumno(), mensaje);
+      if (alumnosInscriptos.size() <= curso.getCupo()) {
+        // Entran todos los inscriptos
+        aceptarInscripciones(inscripciones);
 
-      return ResponseEntity.ok("Inscripción confirmada!");
-    } catch (Exception e) {
+      } else {
+        List<Alumno> alumnosOrdenados = selectorAlumnosAInscribir.ordernarAlumnos(alumnosInscriptos);
+        List<Inscripcion> inscripcionesAceptadas = inscripciones.stream()
+            .filter(inscripcion -> {return alumnosOrdenados.subList(0, curso.getCupo()).contains(inscripcion.getAlumno());}).toList();
+        List<Inscripcion> inscripcionesRechazadas = inscripciones.stream()
+            .filter(inscripcion -> {return !alumnosOrdenados.subList(0, curso.getCupo()).contains(inscripcion.getAlumno());}).toList();
+
+        aceptarInscripciones(inscripcionesAceptadas);
+        rechazarInscripciones(inscripcionesRechazadas);
+      }
+    }
+    catch (Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
     }
+    return ResponseEntity.ok("Inscripciones cerradas");
   }
 
-  @PostMapping("/rechazar")
-  public ResponseEntity<String> rechazarInscripcion(@RequestBody Inscripcion inscripcionRequest) {
-    try {
-      EstadoInscripcion estadoInscripcion = new EstadoInscripcion(TipoEstadoInscripcion.RECHAZADA, LocalDateTime.now(), inscripcionRequest);
-      inscripcionRequest.setEstadoActual(estadoInscripcion);
-      inscripcionRepository.save(inscripcionRequest);
 
-      Mensaje mensaje = new Mensaje("Inscripcion", "Inscripcion rechazada en el curso " + inscripcionRequest.getCurso().getCodigo());
-      Notificador.notificar(inscripcionRequest.getAlumno(), mensaje);
+  private void aceptarInscripciones(List<Inscripcion> inscripciones) {
+    inscripciones.forEach(inscripcion -> {
+      inscripcion.setEstadoActual(new EstadoInscripcion(TipoEstadoInscripcion.APROBADA, LocalDateTime.now(), inscripcion));
 
-      return ResponseEntity.ok("Inscripción rechazada!");
-    } catch (Exception e) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-    }
+      Mensaje mensaje = new Mensaje("Inscripcion", "Inscripcion confirmada en el curso " + inscripcion.getCurso().getCodigo());
+      Notificador.notificar(inscripcion.getAlumno(), mensaje);
+
+      inscripcionRepository.save(inscripcion);
+    });
+  }
+
+  private void rechazarInscripciones(List<Inscripcion> inscripciones) {
+    inscripciones.forEach(inscripcion -> {
+      inscripcion.setEstadoActual(new EstadoInscripcion(TipoEstadoInscripcion.RECHAZADA, LocalDateTime.now(), inscripcion));
+
+      Mensaje mensaje = new Mensaje("Inscripcion", "Inscripcion rechazada en el curso " + inscripcion.getCurso().getCodigo());
+      Notificador.notificar(inscripcion.getAlumno(), mensaje);
+
+      inscripcionRepository.save(inscripcion);
+    });
   }
 
 }

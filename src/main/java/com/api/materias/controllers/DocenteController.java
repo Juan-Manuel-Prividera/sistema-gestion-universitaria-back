@@ -12,11 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class DocenteController {
   private final DocenteRepository docenteRepository;
-  private final CursoRepository cursoRepository;
 
-  public DocenteController(DocenteRepository docenteRepository, CursoRepository cursoRepository) {
+  public DocenteController(DocenteRepository docenteRepository) {
     this.docenteRepository = docenteRepository;
-    this.cursoRepository = cursoRepository;
   }
 
   @PostMapping("/docente")
