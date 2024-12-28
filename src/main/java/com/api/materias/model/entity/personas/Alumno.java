@@ -2,7 +2,7 @@ package com.api.materias.model.entity.personas;
 
 import com.api.materias.model.entity.Mensaje;
 import com.api.materias.model.entity.Persistente;
-import com.api.materias.service.ReceptorNotificaciones;
+import com.api.materias.model.entity.usuarios.Usuario;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -26,6 +26,10 @@ public class Alumno extends Persistente implements ReceptorNotificaciones {
 
   @OneToOne @JoinColumn(name = "contacto_id",referencedColumnName = "id")
   private Contacto contacto;
+
+  @OneToOne @JoinColumn(name = "usuario_id",referencedColumnName = "id")
+  private Usuario usuario;
+
 
   public void update(Alumno alumno) {
     if (!Objects.equals(this.nombre, alumno.nombre)) {

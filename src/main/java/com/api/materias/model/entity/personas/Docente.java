@@ -1,7 +1,9 @@
 package com.api.materias.model.entity.personas;
 
 
+import com.api.materias.model.entity.Mensaje;
 import com.api.materias.model.entity.Persistente;
+import com.api.materias.model.entity.usuarios.Usuario;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,7 +16,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity @Table(name = "docente")
-public class Docente extends Persistente {
+public class Docente extends Persistente implements ReceptorNotificaciones{
   @Column
   private String nombre;
   @Column
@@ -25,6 +27,9 @@ public class Docente extends Persistente {
   private Integer edad;
   @Column
   private LocalDate fechaIngresoDocente;
+
+  @OneToOne @JoinColumn(name = "usuario_id",referencedColumnName = "id")
+  private Usuario usuario;
 
   public void update(Docente docente) {
     if (!Objects.equals(this.nombre, docente.nombre)) {
@@ -43,5 +48,10 @@ public class Docente extends Persistente {
       this.fechaIngresoDocente = docente.fechaIngresoDocente;
     }
 
+  }
+
+  @Override
+  public void recibirNotificacion(Mensaje mensaje) {
+    contacto.enviarNotificacion(mensaje);
   }
 }

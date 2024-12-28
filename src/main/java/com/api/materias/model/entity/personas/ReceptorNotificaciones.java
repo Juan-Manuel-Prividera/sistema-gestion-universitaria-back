@@ -1,4 +1,4 @@
-package com.api.materias.service;
+package com.api.materias.model.entity.personas;
 
 import com.api.materias.model.entity.Mensaje;
 

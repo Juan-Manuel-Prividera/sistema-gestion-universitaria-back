@@ -1,6 +1,7 @@
 package com.api.materias.service;
 
 import com.api.materias.model.entity.Mensaje;
+import com.api.materias.model.entity.personas.ReceptorNotificaciones;
 import org.springframework.stereotype.Service;
 
 @Service
