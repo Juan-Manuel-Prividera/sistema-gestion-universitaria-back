@@ -1,7 +1,7 @@
 # Sistema Web de Gestion de Materias
 
 ## Caracteristicas principales
-- Tecnologias: Java, Spring, Spring Boot, Spring Data JPA, Hibernate, MySQL
+- Tecnologias: Java, Spring, Spring Boot, Spring Data JPA, Spring Security, Hibernate, MySQL
 - Es un backend para una aplicacion web cliente pesado, que permita la gestion de cursos, materias, alumnos y docentes para universidades. Al estilo siu guarani
 - Los alumnos y docentes pueden recibir notificaciones via email.
 - Usuarios principales: Alumnos y Docentes
