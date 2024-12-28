@@ -30,7 +30,11 @@
 - Visualizar estatidisticas sobre el resultado de calificaciones en cada curso.
 
 ### Como admin 
-- Poder registrar alumnos y docentes.
 - Poder asignar materias a los planes de estudio.
 - Poder asignar docentes a los cursos.
-- Poder cerrar las inscripciones a los cursos.
+- Poder abrir y cerrar las inscripciones a los cursos.
+- Poder crear y configurar cursos.
+
+## Diagrama de Clases 
+![image](https://github.com/user-attachments/assets/0560dd9f-a8d8-4be1-a9af-ace58f907484)
+
