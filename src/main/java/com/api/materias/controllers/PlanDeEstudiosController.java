@@ -5,6 +5,7 @@ import com.api.materias.model.entity.curso.Materia;
 import com.api.materias.model.repository.PlanDeEstudiosRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,21 +19,25 @@ public class PlanDeEstudiosController {
     this.planesRepository = planesRepository;
   }
 
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
   @GetMapping("/planes")
   public List<PlanDeEstudios> getAllPlanes(){
     return planesRepository.findAll();
   }
 
+  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_ALUMNO')")
   @GetMapping("/plan/{codigo}")
   public PlanDeEstudios getPlanDeEstudios(@PathVariable String codigo){
     return planesRepository.findByCodigo(codigo);
   }
 
+  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_ALUMNO')")
   @GetMapping("/plan/{codigo}/materias")
   public List<Materia> getPlanDeEstudiosMaterias(@PathVariable String codigo){
     return planesRepository.findByCodigo(codigo).getMaterias();
   }
 
+  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_ALUMNO')")
   @GetMapping("/plan/{codigo}/materias/{nivel}")
   public List<Materia> getPlanDeEstudiosMateriasNivel(@PathVariable String codigo, @PathVariable Integer nivel){
     List<Materia> materias= planesRepository.findByCodigo(codigo).getMaterias();
@@ -41,6 +46,7 @@ public class PlanDeEstudiosController {
         .toList();
   }
 
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
   @PostMapping("/planes")
   public ResponseEntity<String> createPlanDeEstudios(@RequestBody PlanDeEstudios plan){
     try {

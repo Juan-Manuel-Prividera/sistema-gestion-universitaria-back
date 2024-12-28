@@ -11,6 +11,7 @@ import com.api.materias.service.SelectorAlumnosAInscribir;
 import com.api.materias.service.ValidadorCorrelativas;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -31,6 +32,7 @@ public class InscripcionController {
     this.cursadaRepository = cursadaRepository;
   }
 
+  @PreAuthorize("hasRole('ROLE_ALUMNO')")
   @PostMapping("/")
   public ResponseEntity<String> inscribir(@RequestBody Inscripcion inscripcionRequest) {
     try {
@@ -54,7 +56,7 @@ public class InscripcionController {
   }
 
 
-
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
   @PostMapping("curso/{idCurso}/cerrar")
   public ResponseEntity<String> cerrarInscripciones(@PathVariable Long idCurso) {
     try {

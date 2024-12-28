@@ -6,6 +6,7 @@ import com.api.materias.model.repository.CursadaRepository;
 import com.api.materias.model.repository.InscripcionRepository;
 import com.api.materias.service.CalculadorPromedios;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -27,11 +28,13 @@ public class AlumnoController {
     this.inscripcionRepository = inscripcionRepository;
   }
 
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
   @GetMapping("/{idAlumno}")
   public Alumno getAlumno(@PathVariable Long idAlumno) {
     return alumnoRepository.findById(idAlumno).orElse(null);
   }
 
+  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_DOCENTE')")
   @GetMapping("/curso/{idCurso}")
   public List<Alumno> getAlumnosPorCurso(@PathVariable Long idCurso) {
     List<Alumno> alumnos = new ArrayList<>();
@@ -40,6 +43,7 @@ public class AlumnoController {
     return alumnos;
   }
 
+  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_ALUMNO')")
   @GetMapping("/{idAlumno}/promedio/total")
   public Double getPromedioTotal(@PathVariable Long idAlumno) {
     List<Double> calificaciones = new ArrayList<>();
@@ -48,6 +52,7 @@ public class AlumnoController {
     return calculadorPromedios.calcularPromedio(calificaciones);
   }
 
+  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_ALUMNO')")
   @GetMapping("/{idAlumno}/promedio/nivel/{nivel}")
   public Double getPromedioPorNivel(@PathVariable Long idAlumno, @PathVariable Integer nivel) {
     List<Double> calificaciones = new ArrayList<>();
@@ -57,6 +62,7 @@ public class AlumnoController {
   }
 
 
+  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_ALUMNO')")
   @PostMapping("/")
   public ResponseEntity<String> crearAlumno(@RequestBody Alumno alumno) {
     try {
@@ -67,6 +73,7 @@ public class AlumnoController {
     }
   }
 
+  @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_ALUMNO')")
   @PostMapping("/{idAlumno}")
   public ResponseEntity<String> actualizarAlumno(@PathVariable Long idAlumno, @RequestBody Alumno alumno) {
     if (alumnoRepository.findById(idAlumno).isPresent()) {

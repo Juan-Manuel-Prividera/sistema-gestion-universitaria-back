@@ -5,6 +5,7 @@ import com.api.materias.model.entity.evaluaciones.Calificacion;
 import com.api.materias.model.repository.CalificacionRepository;
 import com.api.materias.service.Notificador;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,23 +19,25 @@ public class CalificacionController {
     this.calificacionRepository = calificacionRepository;
   }
 
-
+  @PreAuthorize("hasRole('ROLE_DOCENTE') or hasRole('ROLE_ADMIN')")
   @GetMapping("/{idCalificacion}")
   public Calificacion getCalificacionPorId(@PathVariable Long idCalificacion) {
     return calificacionRepository.findById(idCalificacion).orElse(null);
   }
 
+  @PreAuthorize("hasRole('ROLE_DOCENTE') or hasRole('ROLE_ALUMNO')")
   @GetMapping("/alumnos/{idAlumno}")
   public List<Calificacion> getCalificacionesPorAlumno(@PathVariable Long idAlumno) {
     return calificacionRepository.findByAlumnoId(idAlumno);
   }
 
+  @PreAuthorize("hasRole('ROLE_DOCENTE')")
   @GetMapping("/evaluacion/{idEvaluacion}")
   public List<Calificacion> getCalificacionesPorEvaluacion(@PathVariable Long idEvaluacion) {
     return calificacionRepository.findByEvaluacionId(idEvaluacion);
   }
 
-
+  @PreAuthorize("hasRole('ROLE_DOCENTE')")
   @PostMapping("/")
   public ResponseEntity<String> createCalificacion(@RequestBody Calificacion calificacion) {
     try {

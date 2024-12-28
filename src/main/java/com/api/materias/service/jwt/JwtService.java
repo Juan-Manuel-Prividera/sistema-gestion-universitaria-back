@@ -9,15 +9,14 @@ import org.springframework.stereotype.Service;
 import java.security.Key;
 import java.util.Date;
 import java.util.Map;
-import java.util.Objects;
-
-import static javax.crypto.Cipher.SECRET_KEY;
 
 
 @Service
 public class JwtService {
   private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-  private static final long EXPIRATION_TIME = 86400000; // 1 día
+
+  private static final long EXPIRATION_TIME_TOKEN = 10800000; // 3 horas
+  private static final long EXPIRATION_TIME_REFRESH_TOKEN = 43200000; // 12 horas
 
   public String generarToken(Usuario usuario) {
     return Jwts.builder()
@@ -26,7 +25,7 @@ public class JwtService {
       .claim("id", usuario.getId())
       .claim("permisos", usuario.getRol().getPermisos())
       .setIssuedAt(new Date())
-      .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+      .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME_TOKEN))
       .signWith(key)
       .compact();
   }
@@ -40,11 +39,11 @@ public class JwtService {
 
   }
 
-  public String generateRefreshToken(String username) {
+  public String generarRefreshToken(Usuario usuario) {
     return Jwts.builder()
-        .setSubject(username)
+        .setSubject(usuario.getUsername())
         .setIssuedAt(new Date())
-        .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7)) // 7 días
+        .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME_REFRESH_TOKEN))
         .signWith(key)
         .compact();
   }

@@ -3,6 +3,7 @@ package com.api.materias.controllers;
 import com.api.materias.model.entity.curso.Curso;
 import com.api.materias.model.repository.CursoRepository;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,17 +17,20 @@ public class CursoController {
     this.cursoRepository = cursoRepository;
   }
 
+  @PreAuthorize("hasRole('ROLE_DOCENTE') or hasRole('ROLE_ADMIN')")
   @GetMapping("/{idCurso}")
   public Curso getCurusoPorId(@PathVariable Long idCurso) {
     return cursoRepository.findById(idCurso).orElse(null);
   }
 
+  @PreAuthorize("hasRole('ROLE_DOCENTE') or hasRole('ROLE_ADMIN')")
   @GetMapping("/docente/{idDocente}")
   public List<Curso> getCursosPorDocente(@PathVariable Long idDocente) {
     return cursoRepository.findAllByDocenteId(idDocente);
   }
 
 
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
   @PostMapping("/")
   public ResponseEntity<String> crearCurso(@RequestBody Curso curso) {
     try {

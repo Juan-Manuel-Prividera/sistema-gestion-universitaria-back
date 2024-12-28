@@ -5,11 +5,14 @@ import com.api.materias.model.entity.curso.Materia;
 import com.api.materias.model.repository.MateriaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
+
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 @RestController
 public class MateriaController {
 
@@ -29,6 +32,7 @@ public class MateriaController {
     Optional<Materia> materia = materiaRepository.findById(id);
     return materia.orElse(null);
   }
+
 
   @PostMapping("/materias")
   public ResponseEntity<String> createMateria(@RequestBody Materia materiaRequest) {

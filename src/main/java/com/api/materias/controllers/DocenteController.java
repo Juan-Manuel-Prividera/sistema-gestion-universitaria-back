@@ -1,14 +1,15 @@
 package com.api.materias.controllers;
 
 import com.api.materias.model.entity.personas.Docente;
-import com.api.materias.model.repository.CursoRepository;
 import com.api.materias.model.repository.DocenteRepository;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 @RestController
 public class DocenteController {
   private final DocenteRepository docenteRepository;

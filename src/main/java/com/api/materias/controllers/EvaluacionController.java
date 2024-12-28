@@ -6,6 +6,7 @@ import com.api.materias.model.repository.CalificacionRepository;
 import com.api.materias.model.repository.EvaluacionRepository;
 import com.api.materias.service.CalculadorEstadisticasEvaluacion;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,16 +27,19 @@ public class EvaluacionController {
     this.calculadorEstadisticasEvaluacion = calculadorEstadisticasEvaluacion;
   }
 
+  @PreAuthorize("hasRole('ROLE_DOCENTE') or hasRole('ROLE_ADMIN')")
   @GetMapping("/curso/{idCurso}")
   public List<Evaluacion> getEvaluacionesPorCurso(@PathVariable Long idCurso) {
     return evaluacionRepository.findByCursoId(idCurso);
   }
 
+  @PreAuthorize("hasRole('ROLE_DOCENTE') or hasRole('ROLE_ADMIN')")
   @GetMapping("/{idEvaluacion}")
   public Evaluacion getEvaluacionPorId(@PathVariable Long idEvaluacion) {
     return evaluacionRepository.findById(idEvaluacion).orElse(null);
   }
 
+  @PreAuthorize("hasRole('ROLE_DOCENTE') or hasRole('ROLE_ADMIN') or hasRole('ROLE_ALUMNO')")
   @GetMapping("{idEvaluacion}/estadisticas")
   public Evaluacion getEstadisticasEvaluacion(@PathVariable Long idEvaluacion) {
     Evaluacion evaluacion = evaluacionRepository.findById(idEvaluacion).orElse(null);
@@ -47,7 +51,7 @@ public class EvaluacionController {
     return evaluacion;
   }
 
-
+  @PreAuthorize("hasRole('ROLE_DOCENTE')")
   @PostMapping("/")
   public ResponseEntity<String> crearEvaluacion(@RequestPart Evaluacion evaluacion, @RequestPart MultipartFile archivo) {
     try {

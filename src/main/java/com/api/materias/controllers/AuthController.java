@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.naming.ldap.PagedResultsControl;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -36,8 +37,15 @@ public class AuthController {
       if (!passwordEncoder.matches(usuario.getPassword(),user.getPassword())) {
         throw new RuntimeException("Credenciales incorrectas");
       }
+      String accessToken = jwtService.generarToken(usuario);
+      String refreshToken = jwtService.generarRefreshToken(usuario);
 
-      return ResponseEntity.ok(jwtService.generarToken(usuario));
+      Map<String, String> tokens = new HashMap<>();
+      tokens.put("accessToken", accessToken);
+      tokens.put("refreshToken", refreshToken);
+
+      // Si se logeo correctamente, se generan los tokens y se envian al cliente
+      return ResponseEntity.ok(tokens.toString());
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
@@ -48,30 +56,36 @@ public class AuthController {
     try {
       user.setPassword(passwordEncoder.encode(user.getPassword()));
       userRepository.save(user);
+      // No genera token ya que luego de registrarse debe logearse
       return ResponseEntity.ok("Usuario registrado");
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
+
   @PostMapping("/refresh")
-  public String refreshToken(HttpServletRequest request) {
-    String authorizationHeader = request.getHeader("Authorization");
+  public ResponseEntity<String> refreshToken(HttpServletRequest request) {
+    try {
+      String authorizationHeader = request.getHeader("Authorization");
 
-    if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-      throw new RuntimeException("Refresh token ausente o inválido");
-    }
+      if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+        throw new RuntimeException("Refresh token ausente o inválido");
+      }
 
-    String refreshToken = authorizationHeader.substring(7);
-    String username = jwtService.extractUsername(refreshToken); // Extraer el usuario del refresh token
+      String refreshToken = authorizationHeader.substring(7);
+      String username = jwtService.extractUsername(refreshToken);
 
-    if (username != null && jwtService.validarToken(refreshToken) != null) {
-      // Generar un nuevo access token
-      Usuario user = userRepository.findByUsername(username)
-          .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+      if (username != null && jwtService.validarToken(refreshToken) != null) {
+        // Generar un nuevo access token
+        Usuario user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-      return jwtService.generarToken(user);
-    } else {
-      throw new RuntimeException("Token inválido");
+        return ResponseEntity.ok(jwtService.generarToken(user));
+      } else {
+        throw new RuntimeException("Token inválido");
+      }
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
 }

@@ -7,6 +7,7 @@ import com.api.materias.model.repository.CalificacionRepository;
 import com.api.materias.model.repository.CursadaRepository;
 import com.api.materias.service.Notificador;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -23,27 +24,32 @@ public class CursadaController {
     this.calificacionRepository = calificacionRepository;
   }
 
+  @PreAuthorize("hasRole('ROLE_ALUMNO')")
   @GetMapping("/alumno/{idAlumno}/nivel/{nivel}")
   public List<Cursada> getCursadasPorAlumnoPorNivel(@PathVariable Long idAlumno, @PathVariable Integer nivel) {
     return cursadaRepository.findByAlumnoIdAndNivel(idAlumno, nivel);
   }
 
+  @PreAuthorize("hasRole('ROLE_ALUMNO') or hasRole('ROLE_ADMIN')")
   @GetMapping("/alumno/{idAlumno}")
   public List<Cursada> getCursadasPorAlumno(@PathVariable Long idAlumno) {
     return cursadaRepository.findByAlumnoId(idAlumno);
   }
 
+  @PreAuthorize("hasRole('ROLE_ALUMNO')")
   @GetMapping("/alumno/{idAlumno}/encursuo")
   public List<Cursada> getCursadasEnCursoPorAlumno(@PathVariable Long idAlumno) {
     return cursadaRepository.findByAlumnoIdAndFinalizado(idAlumno, true);
   }
 
+  @PreAuthorize("hasRole('ROLE_ALUMNO')")
   @GetMapping("/{idCursada}/calificaciones")
   public List<Calificacion> getCalificacionesPorCursadaPorAlumno(@PathVariable Long idCursada) {
     return calificacionRepository.findByCursadaId(idCursada);
   }
 
 
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
   @PostMapping("/")
   public ResponseEntity<String> createCursada(@RequestBody Cursada cursada) {
     try {
@@ -54,6 +60,7 @@ public class CursadaController {
     }
   }
 
+  @PreAuthorize("hasRole('ROLE_DOCENTE')")
   @PostMapping("/{idCursada}/calificacion/final")
   public ResponseEntity<String> setCalificacionFinal(@PathVariable Long idCursada, @RequestBody Double calificacionFinal) {
     Cursada cursada = cursadaRepository.findById(idCursada).orElse(null);
