@@ -1,8 +1,5 @@
-package com.api.materias.config;
+package com.api.materias.service.security;
 
-import com.api.materias.model.entity.usuarios.Permiso;
-import com.api.materias.model.entity.usuarios.Rol;
-import com.api.materias.service.jwt.JwtService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -34,21 +31,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       chain.doFilter(request, response);
       return;
     }
-
     String token = authHeader.substring(7);
-    Claims claims = (Claims) jwtService.validarToken(token);
-    String username = claims.getSubject();
-    Rol rol = (Rol) claims.get("rol");
-    List<Permiso> permisos = (List<Permiso>) claims.get("permisos");
+    try {
+      String tokenParseado = token.replace("Bearer ", "");
 
-    List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-    authorities.add(new SimpleGrantedAuthority("ROLE_" + rol.getRol()));
-    permisos.forEach(permiso -> authorities.add(new SimpleGrantedAuthority(permiso.getPermiso())));
+      Claims claims = jwtService.validarToken(tokenParseado);
+      String username = claims.getSubject();
+      String rol = (String) claims.get("rol");
+      List<String> permisos = (List<String>) claims.get("permisos");
 
-    UsernamePasswordAuthenticationToken authToken =
-        new UsernamePasswordAuthenticationToken(username, null, authorities);
-    SecurityContextHolder.getContext().setAuthentication(authToken);
+      // Convierto Rol y Permisos a SimpleGrantedAuthority para que Spring Security los pueda interpretar
+      List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+      authorities.add(new SimpleGrantedAuthority("ROLE_" + rol));
+      permisos.forEach(permiso -> authorities.add(new SimpleGrantedAuthority(permiso)));
 
-    chain.doFilter(request, response);
+      // Objeto autenticacion que usa Spring Security
+      UsernamePasswordAuthenticationToken authToken =
+          new UsernamePasswordAuthenticationToken(username, null, authorities);
+
+      SecurityContextHolder.getContext().setAuthentication(authToken);
+
+      chain.doFilter(request, response);
+    } catch (Exception e) {
+      response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+      response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+    }
   }
 }

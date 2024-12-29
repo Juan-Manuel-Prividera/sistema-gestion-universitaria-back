@@ -17,6 +17,7 @@ public class Usuario extends Persistente {
   private String username;
   @Column
   private String password;
-  @ManyToOne @JoinColumn(name = "rol_id", referencedColumnName = "id")
+
+  @ManyToOne(fetch = FetchType.EAGER) @JoinColumn(name = "rol_id", referencedColumnName = "id")
   private Rol rol;
 }

@@ -1,4 +1,4 @@
-package com.api.materias.config;
+package com.api.materias.config.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

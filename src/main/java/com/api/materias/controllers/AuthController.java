@@ -1,15 +1,13 @@
 package com.api.materias.controllers;
 
 import com.api.materias.model.entity.usuarios.Usuario;
+import com.api.materias.model.repository.RolRepository;
 import com.api.materias.model.repository.UsuarioRepository;
-import com.api.materias.service.jwt.JwtService;
+import com.api.materias.service.security.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,12 +15,13 @@ import java.util.Map;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-
+  private final RolRepository rolRepository;
   private final UsuarioRepository userRepository;
   private final JwtService jwtService;
   private final PasswordEncoder passwordEncoder;
 
-  public AuthController(UsuarioRepository userRepository, JwtService jwtService, PasswordEncoder passwordEncoder) {
+  public AuthController(RolRepository rolRepository, UsuarioRepository userRepository, JwtService jwtService, PasswordEncoder passwordEncoder) {
+    this.rolRepository = rolRepository;
     this.userRepository = userRepository;
     this.jwtService = jwtService;
     this.passwordEncoder = passwordEncoder;
@@ -34,7 +33,7 @@ public class AuthController {
       Usuario usuario = userRepository.findByUsername(user.getUsername())
           .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-      if (!passwordEncoder.matches(usuario.getPassword(),user.getPassword())) {
+      if (!passwordEncoder.matches(user.getPassword(),usuario.getPassword())) {
         throw new RuntimeException("Credenciales incorrectas");
       }
       String accessToken = jwtService.generarToken(usuario);
@@ -51,10 +50,13 @@ public class AuthController {
     }
   }
 
-  @PostMapping("/register")
-  public ResponseEntity<String> register(@RequestBody Usuario user) {
+  @PostMapping("/register/{rol}")
+  public ResponseEntity<String> register(@RequestBody Usuario user, @PathVariable String rol) {
     try {
       user.setPassword(passwordEncoder.encode(user.getPassword()));
+      user.setRol(rolRepository.findByRol(rol.toUpperCase())
+          .orElseThrow(() -> new RuntimeException("Rol "+ rol +" no encontrado")));
+
       userRepository.save(user);
       // No genera token ya que luego de registrarse debe logearse
       return ResponseEntity.ok("Usuario registrado");
@@ -88,4 +90,5 @@ public class AuthController {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
+
 }
