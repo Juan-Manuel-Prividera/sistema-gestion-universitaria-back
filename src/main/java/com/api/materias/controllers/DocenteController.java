@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-@PreAuthorize("hasRole('ROLE_ADMIN')")
 @RestController
 public class DocenteController {
   private final DocenteRepository docenteRepository;
@@ -18,6 +17,7 @@ public class DocenteController {
     this.docenteRepository = docenteRepository;
   }
 
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
   @PostMapping("/docente")
   public ResponseEntity<String> crearDocente(@RequestBody Docente docente) {
     try {
@@ -28,6 +28,7 @@ public class DocenteController {
     }
   }
 
+  @PreAuthorize("hasRole('ROLE_DOCENTE') and #idDocente == principal.idDocente")
   @PostMapping("/docentes/{idDocente}")
   public ResponseEntity<String> actualizarDocente(@PathVariable Long idDocente, @RequestBody Docente docente) {
     try {

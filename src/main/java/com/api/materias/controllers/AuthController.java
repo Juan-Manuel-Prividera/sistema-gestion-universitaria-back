@@ -1,6 +1,10 @@
 package com.api.materias.controllers;
 
+import com.api.materias.model.entity.personas.Alumno;
+import com.api.materias.model.entity.personas.Docente;
 import com.api.materias.model.entity.usuarios.Usuario;
+import com.api.materias.model.repository.AlumnoRepository;
+import com.api.materias.model.repository.DocenteRepository;
 import com.api.materias.model.repository.RolRepository;
 import com.api.materias.model.repository.UsuarioRepository;
 import com.api.materias.service.security.JwtService;
@@ -9,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.print.Doc;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,12 +24,16 @@ public class AuthController {
   private final UsuarioRepository userRepository;
   private final JwtService jwtService;
   private final PasswordEncoder passwordEncoder;
+  private final AlumnoRepository alumnoRepository;
+  private final DocenteRepository docenteRepository;
 
-  public AuthController(RolRepository rolRepository, UsuarioRepository userRepository, JwtService jwtService, PasswordEncoder passwordEncoder) {
+  public AuthController(RolRepository rolRepository, UsuarioRepository userRepository, JwtService jwtService, PasswordEncoder passwordEncoder, AlumnoRepository alumnoRepository, DocenteRepository docenteRepository) {
     this.rolRepository = rolRepository;
     this.userRepository = userRepository;
     this.jwtService = jwtService;
     this.passwordEncoder = passwordEncoder;
+    this.alumnoRepository = alumnoRepository;
+    this.docenteRepository = docenteRepository;
   }
 
   @PostMapping("/login")
@@ -36,7 +45,18 @@ public class AuthController {
       if (!passwordEncoder.matches(user.getPassword(),usuario.getPassword())) {
         throw new RuntimeException("Credenciales incorrectas");
       }
-      String accessToken = jwtService.generarToken(usuario);
+      // TODO: Mejorar :)
+      Alumno alumno = alumnoRepository.findByUsuario(usuario);
+      Docente docente = docenteRepository.findByUsuario(usuario);
+
+      String accessToken;
+      if (alumno != null) {
+        accessToken = jwtService.generarToken(usuario, alumno);
+      } else if (docente != null) {
+        accessToken = jwtService.generarToken(usuario, docente);
+      } else {
+        accessToken = jwtService.generarToken(usuario);
+      }
       String refreshToken = jwtService.generarRefreshToken(usuario);
 
       Map<String, String> tokens = new HashMap<>();

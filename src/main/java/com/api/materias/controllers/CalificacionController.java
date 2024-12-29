@@ -37,7 +37,8 @@ public class CalificacionController {
     return calificacionRepository.findByEvaluacionId(idEvaluacion);
   }
 
-  @PreAuthorize("hasRole('ROLE_DOCENTE')")
+  // Los Ayudantes podrian considerarse docentes pero en ese caso no deberian poder calificar a los alumnos
+  @PreAuthorize("hasRole('ROLE_DOCENTE') and hasAuthority('PERM_CALIFICAR')")
   @PostMapping("/")
   public ResponseEntity<String> createCalificacion(@RequestBody Calificacion calificacion) {
     try {
