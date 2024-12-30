@@ -20,7 +20,7 @@ public class SelectorAlumnosAInscribir {
     alumnos.sort((a1, a2) -> {
       int pesoAcademico1 = calcularPesoAcademico(a1);
       int pesoAcademico2 = calcularPesoAcademico(a2);
-      return pesoAcademico1 - pesoAcademico2;
+      return pesoAcademico2 - pesoAcademico1;
     });
     return alumnos;
   }

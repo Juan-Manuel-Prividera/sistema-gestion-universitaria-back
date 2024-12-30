@@ -4,14 +4,16 @@ import com.api.materias.model.entity.Mensaje;
 import com.api.materias.model.entity.Persistente;
 import com.api.materias.model.entity.usuarios.Usuario;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 import java.util.Objects;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
+@Builder
 @Entity @Table
+@NoArgsConstructor
+@AllArgsConstructor
 public class Alumno extends Persistente implements ReceptorNotificaciones {
   @Column
   private String nombre;
