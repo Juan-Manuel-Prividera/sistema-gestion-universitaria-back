@@ -37,7 +37,7 @@ public class AuthController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<String> login(@RequestBody Usuario user) {
+  public ResponseEntity<Map<String,String>> login(@RequestBody Usuario user) {
     try {
       Usuario usuario = userRepository.findByUsername(user.getUsername())
           .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -64,9 +64,9 @@ public class AuthController {
       tokens.put("refreshToken", refreshToken);
 
       // Si se logeo correctamente, se generan los tokens y se envian al cliente
-      return ResponseEntity.ok(tokens.toString());
+      return ResponseEntity.ok(tokens);
     } catch (Exception e) {
-      return ResponseEntity.badRequest().body(e.getMessage());
+      return ResponseEntity.badRequest().body(Map.of("error",e.getMessage()));
     }
   }
 
